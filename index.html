@@ -61,7 +61,8 @@ $(document).on("pageinit","#Principal", function(e, data){
 		
 		$.ajax({
 		  type:"POST",
-		  url:"http://silvaleo.260mb.net//guardarServicios.php",
+		  url:"http://silvaleo.260mb.net/guardarServicios.php",
+		  //url:"guardarServicios.php",
 		  data:"nombre="+nom+"&dir="+dir+"&tel="+tel+"&email="+email+"&lat="+lat+"&long="+lon,
 		  success: guardandoServicios		  		
 		});
@@ -71,9 +72,13 @@ $(document).on("pageinit","#Principal", function(e, data){
 		}
 		uploadPhoto($("#imagen").attr("src"));	
 	    }
-        }); 
-          	
+        });
+  	
     }
+    	
+	     
+
+    
     
  function uploadPhoto(foto) {  
 	//alert("si entro: "+foto);
@@ -184,8 +189,146 @@ $(document).on("pageinit","#Principal", function(e, data){
 	    content:'<div style="width:200px; height:160px;"><div style="text-align: center; color:#5c041b; font-weight:bolder; font-size:12px; font-family:arial;">' + nombre + '</div><img src="'+ruta+'" width="100" heigth="60" /><div style="text-align:center; color: #2e20b8; font-size:12px; font-family:arial; width:200px; text-align:center;">' + dir + '</div><div>Tel: ' + tel + '</div><div>Email:' + mail + '</div>'
 	  });
 	  google.maps.event.addListener(marca2, "click", function(){infoVentanta2.open(map,this);});
-    }    
+    }
+     });
+       
+     $(document).ready(function inicio(){
+      function dibujarTabla(respConAct, respCarga) {
+   respConAct.html("");
+   respConAct.append('<table id="tab" border="1">');
+    var tabla=$("#tab");
+    tabla.html("<tr><th>ID</th><th>Nombre</th><th>Direccion</th><th>Telefono</th><th>Foto</th><th>Email</th><th>Latitud</th><th>Longitud</th></tr>");
+    for(var i in respCarga){
+      tabla.append("<tr><td>"+respCarga[i].Id_Servicio+"</td>"
+      +"<td>"+respCarga[i].Nombre+"</td>"
+      +"<td>"+respCarga[i].Direccion+"</td>"
+      +"<td>"+respCarga[i].Telefono+"</td>"
+      +"<td>"+respCarga[i].Foto+"</td>"
+        +"<td>"+respCarga[i].Email+"</td>"
+      +"<td>"+respCarga[i].Latitud+"</td>"
+      +"<td>"+respCarga[i].Longitud+"</td></tr>");
+      }
+    tabla.append("</table>"); }
+      
+      
+     var btnConsAct=$("#btnConsAct");
+     btnConsAct.click(function cargarDat(){
+      alert("listo");
+     $.ajax({
+      type:"POST",
+      url:"http://silvaleo.260mb.net/consultaServ.php",
+      data:"",
+      success: cargarDato
+    });
+     function cargarDato(datos) {
+      alert(datos);
+        var respCarga=$.parseJSON(datos);
+        var respConAct=$("#respConAct");
+        dibujarTabla(respConAct,respCarga);
+     }
  });
+
+   
+
+ var btnCarDatos=$("#btnCarDatos");
+ btnCarDatos.click(function cargarInf(){
+    var Id=parseInt($("#nomActualizar").val());
+    $.ajax({
+    type:"POST",
+    url:"http://silvaleo.260mb.net/consultaid.php",
+    data:"Id="+Id,
+    success: cargarDatosAct
+        });
+    
+    function cargarDatosAct(datos) {
+    
+        var consDatAct=$.parseJSON(datos);
+        var respCargDatos=$("#respCargDatos");//Div del resultado para dibukar control
+        respCargDatos.html("<label>ID:</label><input type='text' id='Id' disabled='yes'>");
+        respCargDatos.append("<label>Nombre:</label><input type='text' id='nombre'>");
+        respCargDatos.append("<label>Direccion:</label><input type='text' id='dir'>");
+        respCargDatos.append("<label>Telefono:</label><input type='text' id='tel'>");
+	respCargDatos.append("<label>Email:</label><input type='text' id='email'>");
+	respCargDatos.append("<label>Latitud:</label><input type='text' id='lat'>");
+	respCargDatos.append("<label>Longitud:</label><input type='text' id='long'>");
+        var Id=$("#Id");
+        var nom=$("#nombre");
+        var dir=$("#dir");
+        var tel=$("#tel");
+	var email=$("#email");
+	var lat=$("#lat");
+	var long=$("#long");
+        for (var i in consDatAct) {
+            Id.val(consDatAct[i].Id_Servicio);
+            nom.val(consDatAct[i].Nombre);
+            dir.val(consDatAct[i].Direccion);
+            tel.val(consDatAct[i].Telefono);
+	    email.val(consDatAct[i].Email);
+	    lat.val(consDatAct[i].Latitud);
+	    long.val(consDatAct[i].Longitud);
+        }
+    }
+ });
+  var btnGuarDatos=$('#btnGuarDatos'); //Actualiza los datos
+  btnGuarDatos.click(function actual(){
+    var id=parseInt($('#Id').val());
+    var nombre=$('#nombre').val();
+    var dir=$('#dir').val();
+    var tel=$('#tel').val();
+    var email=$('#email').val(); 
+    var lat=$('#lat').val();
+     var long=$('#long').val();
+  
+  if (nombre==""||dir==""||tel==""||email==""||lat==""||long=="" ) {
+    alert("ingresa información en todos los campos");
+  }else{
+    $.ajax({
+      type:"POST",
+      url:"http://silvaleo.260mb.net/actualizar.php",
+      data:"id="+id+"&nombre="+nombre+"&dir="+dir+"&tel="+tel+"&email="+email+"&lat="+lat+"&long="+long,
+      success: actualizacion
+      
+    });
+  }
+  function actualizacion(datos){
+  alert("datos: "+datos);
+
+  }
+  });
+    
+var btnConsEliminar=$("#btnConsEliminar");
+  btnConsEliminar.click(function conEliminar(){
+    $.ajax({
+      type:"POST",
+      url:"http://silvaleo.260mb.net/consultaServ.php",
+      data:"",
+      success:consultaAntEliminar
+    });
+    function consultaAntEliminar(datos) {
+      var datAntEliminar=$.parseJSON(datos);
+      var respConElim=$("#respConElim");
+      dibujarTabla(respConElim,datAntEliminar);
+    }
+  });
+  
+  var btnEliminar=$("#btnEliminar");
+  btnEliminar.click(function eliminarDato(){
+    var idEliminar=parseInt($("#idEliminar").val());
+	$.ajax({
+      type:"POST",
+      url:"http://silvaleo.260mb.net/eliminar.php",
+      data:"Id="+idEliminar,
+      success:Eliminacion		      
+  });
+	function Eliminacion(datos) {
+	  alert(datos);
+	}
+ });
+    
+    
+    });
+    
+
 </script>
 <style >
 #map-canvas{
@@ -203,7 +346,10 @@ p{
 text-align:center;
 }
 </style>
+
 </head>
+
+
 <body>
  
 <div data-role="page" id="Principal">
@@ -215,8 +361,8 @@ text-align:center;
 	    <li data-role="list-divider" style="text-align:center;">Operaciones</li>
 	    <li><a href="#Registrar">Registrar servicios</a></li>
 	    <li><a href="#Consultar">Consultar servicios</a></li>
-	    <li><a href="#Actualizar">Actualizar servicios</a></li>
-	    <li><a href="#Eliminar">Eliminiar servicios</a></li>
+	    <li><a href="#actualizar">Actualizar servicios</a></li>
+	    <li><a href="#eliminar">Eliminiar servicios</a></li>
 	  </ul>
       </div>
       <div data-role="footer" data-position="fixed" style="text-align:center;">
@@ -266,5 +412,41 @@ text-align:center;
 	
       </div>
 </div>
+
+<div data-role="page" id="actualizar">
+  <div data-role="header" >
+    <p>Actualizar informacion de la Empresa</p>
+  </div>
+  <div data-role="content">
+    <input type="button" id="btnConsAct" value="Cargar Registros">
+        <div id="respConAct"></div>
+        <label for="nomActualizar">ID a actualizar</label>
+        <input type="text" id="nomActualizar">
+        <input type="button" id="btnCarDatos" value="Cargar Datos">
+            <div id="respCargDatos"></div>
+        <input type="button" id="btnGuarDatos" value="Guardar Datos"> 
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+
+<div data-role="page" id="eliminar">
+  <div data-role="header" >
+    <p>Eliminar Negocio</p>
+  </div>
+  <div data-role="content">
+    <input type="button" id="btnConsEliminar" value="Mostrar todos los registros">
+        <div id="respConElim"></div>
+        <label for="idEliminar">ID a Eliminar</label>
+        <input type="text" id="idEliminar">
+        
+        <input type="button" id="btnEliminar" value="Eliminar un registro"> 
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+
 </body>
 </html>
